@@ -8,20 +8,32 @@ public static class GameSaveSystem {
 	//
 	public delegate void SaveHandler();
 	public static event SaveHandler OnGameSave;
+	static string CurrentUser ="";
 	
 	//List that holds all the save data till we save to disk
 	public static ArrayList LevelList=new ArrayList();
 	
+	// NewGame now deletes the user data, not all the Playerprefs
+	// This is just a path and should be fixed with a saved data list so we don't check all the options
 	public static void NewGame()
 	{
 		LevelList.Clear();
-		PlayerPrefs.DeleteAll();
+		
+		for(int i=0;i<=PlayerPrefs.GetInt(CurrentUser + "LastSavedLevel");i++)
+		{
+			if(PlayerPrefs.HasKey(CurrentUser + i.ToString()))
+			{
+				PlayerPrefs.DeleteKey(CurrentUser + i.ToString());
+			}
+		}
+		PlayerPrefs.DeleteKey(CurrentUser + "LastSavedLevel");
 	}
 	
 	public static void Continue()
 	{
-		Application.LoadLevel(PlayerPrefs.GetInt("LastSavedLevel"));
+		Application.LoadLevel(PlayerPrefs.GetString(CurrentUser + "LastSavedLevel"));
 	}
+			
 	
 	//This method should be called when you want to save the object. For example, OnDestroy()
 	public static void SaveObjectState(string Name,SaveObject.States State)
@@ -111,6 +123,7 @@ public static class GameSaveSystem {
 		}
 	}
 	
+	
 	// Call this method when you want to save the memory list to the disk
 	public static bool SaveLevelToDisk(int Level)
     {
@@ -129,7 +142,6 @@ public static class GameSaveSystem {
 				tempList.Add(savedObject);
 			}
 		}
-			
 		
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         for(int i=0;i<tempList.Count - 1;i++)
@@ -148,8 +160,7 @@ public static class GameSaveSystem {
 				else if(j==2)
 				{
 					sb.Append(savedObject.Level).Append("|");
-				}
-					
+				}	
 			}
             
 		}
@@ -178,14 +189,12 @@ public static class GameSaveSystem {
 
         try
         {
-            PlayerPrefs.SetString(Level.ToString(), sb.ToString());
+            PlayerPrefs.SetString(CurrentUser + Level.ToString(), sb.ToString());
         }
         catch (Exception e)
         {
             return false;
         }
-		int unixTime = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-		PlayerPrefs.SetInt("SaveTime",unixTime);
         return true;
     }
 	
@@ -194,7 +203,23 @@ public static class GameSaveSystem {
 	
 	public static void SetLastLoadedLevel()
 	{
-		PlayerPrefs.SetInt("LastSavedLevel",Application.loadedLevel);
+		PlayerPrefs.SetString(CurrentUser + "LastSavedLevel",Application.loadedLevelName);
+	}
+	
+	public static string GetLastLoadedLevel(string user)
+	{
+		string SavedLevel = PlayerPrefs.GetString(user + "LastSavedLevel");
+		return SavedLevel;
+	}
+	
+	public static bool IsGameSaved(string user)
+	{
+		return PlayerPrefs.HasKey(user + "LastSavedLevel");
+	}
+	
+	public static bool IsGameSaved()
+	{
+		return PlayerPrefs.HasKey(CurrentUser + "LastSavedLevel");
 	}
 	
 	// This method is used on LoadLevel
@@ -203,7 +228,7 @@ public static class GameSaveSystem {
     {
         if (PlayerPrefs.HasKey(Level.ToString()))
         {
-            string[] stringArray = PlayerPrefs.GetString(Level.ToString()).Split("|"[0]);
+            string[] stringArray = PlayerPrefs.GetString(CurrentUser + Level.ToString()).Split("|"[0]);
             SaveObject[] SaveObjectArray = new SaveObject[stringArray.Length/3];
 			if(stringArray.Length/3 > 0)
 			{
@@ -248,6 +273,93 @@ public static class GameSaveSystem {
 		LevelList.Clear();
 	}
 	
+	public static void UnSaveObject(string name)
+	{
+		int index = -1;
+		foreach(SaveObject obj in LevelList)
+		{
+			if(obj.Name == name)
+			{
+				index = LevelList.IndexOf(obj);
+			}
+		}
+		if(index >= 0)
+		{
+			LevelList.RemoveAt(index);
+		}
+	}
+	
+	public static void ResetLevel(int Level)
+	{
+		if(LevelList.Count > 0)
+		{
+			SaveObject current = (SaveObject)LevelList[0];	
+			int index = 0;
+			while(current != null)
+			{
+				if(current.Level == Level)
+				{
+					LevelList.Remove(current);
+					
+				}
+				else
+				{
+					index++;
+				}
+				if(index < LevelList.Count)
+				{
+					current = (SaveObject)LevelList[index];
+				}
+				else
+				{
+					current = null;
+				}
+			}
+		}
+	}	
+	
+	// Profiles methods
+	
+	public static bool UserExist(int index)
+	{
+		if(PlayerPrefs.HasKey("User" + index))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public static string NameForUser(int index)
+	{
+		return PlayerPrefs.GetString("User" + index);
+	}
+	
+
+	public static void SetUser(int index,string name)
+	{
+		if(!UserExist(index))
+		{
+			PlayerPrefs.SetString("User" + index,name);
+		}
+		CurrentUser = name;
+	}
+	
+	public static void ClearUserData(int index)
+	{
+		string name = NameForUser(index);
+		for(int i=0;i<=PlayerPrefs.GetInt(CurrentUser + "LastSavedLevel");i++)
+		{
+			if(PlayerPrefs.HasKey(name + i.ToString()))
+			{
+				PlayerPrefs.DeleteKey(name + i.ToString());
+			}
+		}
+		PlayerPrefs.DeleteKey("User" + index);
+	}
+	
 	
 	
 }
@@ -262,6 +374,7 @@ public class SaveObject {
 		Destroyed
 	}
 	public int Level;
+	public string User;
 	
 	public SaveObject(string Name,States State,int Level)
 	{

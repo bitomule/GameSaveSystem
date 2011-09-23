@@ -1,0 +1,15 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Example/SaveToDisk.cs">
+    <Files>
+      <File FileName="Assets/GameSaveSystem.cs" Line="194" Column="1" />
+      <File FileName="Assets/Example/LoadScene.cs" Line="16" Column="18" />
+      <File FileName="Assets/Example/SaveAsDestroyed.cs" Line="8" Column="3" />
+      <File FileName="Assets/Example/SaveToDisk.cs" Line="17" Column="4" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

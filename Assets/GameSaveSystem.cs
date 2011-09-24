@@ -42,7 +42,7 @@ public static class GameSaveSystem {
 		bool Finded = false;
 		foreach (SaveObject savedObject in LevelList)
 		{
-			if(savedObject.Name == Name)
+			if(savedObject.Name == Name && savedObject.Level == Application.loadedLevel)
 			{
 				Finded = true;
 				savedObject.State = State;
@@ -77,7 +77,7 @@ public static class GameSaveSystem {
 				alreadyLoaded = false;
 				foreach (SaveObject savedObject in LevelList)
 				{
-					if(FromDisk[i].Name == savedObject.Name)
+					if(FromDisk[i].Name == savedObject.Name && FromDisk[i].Level == Application.loadedLevel)
 					{
 						alreadyLoaded = true;
 					}

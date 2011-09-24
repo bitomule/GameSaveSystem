@@ -7,7 +7,6 @@ public class LoadScene : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		GameSaveSystem.SetUser(0,"NameExample");
-		
 		GameSaveSystem.LoadLevel();
 	
 	}
